@@ -1,0 +1,118 @@
+{% extends "dashboard.html" %}
+{% load lead_extras %}
+{% block title %}
+    Lead Detail -
+{% endblock title %}
+{% block content %}
+    <main class="p-4 md:ml-64 h-auto pt-20 min-h-screen bg-gray-50 dark:bg-gray-900">
+        <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5">
+            <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
+                <div class="mb-4">
+                    <a href="{% url 'dashboard:leads' %}"
+                       class="inline-flex items-center text-sm font-medium text-primary-700 hover:underline dark:text-primary-400">
+                        <i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>
+                        Back to leads
+                    </a>
+                </div>
+                <div class="grid gap-4 lg:grid-cols-3">
+                    <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-5 lg:col-span-1">
+                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+                            {{ lead.first_name }} {{ lead.last_name }}
+                        </h1>
+                        <div class="mt-4 space-y-4 text-sm">
+                            <div>
+                                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Email</p>
+                                <div class="mt-1 flex items-center gap-2 text-gray-900 dark:text-white">
+                                    <span>{{ lead.masked_email }}</span>
+                                    <button type="button"
+                                            id="leadDetailCopyEmail"
+                                            class="text-gray-500 hover:text-primary-700 dark:text-gray-300 dark:hover:text-white"
+                                            data-email="{{ lead.email }}"
+                                            aria-label="Copy email">
+                                        <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Assigned Agent</p>
+                                <p class="mt-1 text-gray-900 dark:text-white">
+                                    {% if lead.agent %}
+                                        {{ lead.agent.first_name }} {{ lead.agent.last_name }}
+                                    {% else %}
+                                        Unassigned
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Status</p>
+                                <p class="mt-1 text-gray-900 dark:text-white">
+                                    {{ lead.status }}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase text-gray-500 dark:text-gray-400">Revenue</p>
+                                <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                                    {{ lead.revenue|currency }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg p-5 lg:col-span-2">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-4 dark:border-gray-700">
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Timeline</h2>
+                        </div>
+                        {% if records %}
+                            <ol class="mt-5 space-y-4">
+                                {% for record in records %}
+                                    <li class="border-l-2 border-primary-200 pl-4 dark:border-primary-700">
+                                        <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                            <p class="font-medium text-gray-900 dark:text-white">{{ record.title }}</p>
+                                            <time class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ record.timestamp|date:'d M Y, h:i A' }}
+                                            </time>
+                                        </div>
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                            {{ record.description }}
+                                        </p>
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                        {% else %}
+                            <div class="py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                                No records yet
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div id="leadDetailToast"
+             class="hidden fixed bottom-4 right-4 z-50 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-lg dark:bg-gray-700">
+            Email copied
+        </div>
+    </main>
+    <script>
+        (() => {
+            const copyButton = document.getElementById('leadDetailCopyEmail');
+            const toast = document.getElementById('leadDetailToast');
+            let toastTimer;
+
+            const showToast = (message) => {
+                if (!toast) return;
+                toast.textContent = message;
+                toast.classList.remove('hidden');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => toast.classList.add('hidden'), 1800);
+            };
+
+            copyButton?.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(copyButton.dataset.email || '');
+                    showToast('Email copied');
+                } catch (error) {
+                    showToast('Unable to copy email');
+                }
+            });
+        })();
+    </script>
+{% endblock content %}

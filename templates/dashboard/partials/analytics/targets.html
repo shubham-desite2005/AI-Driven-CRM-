@@ -1,0 +1,24 @@
+<section class="sales-card rounded-2xl p-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h2 class="text-xl font-black text-white">Target Tracking</h2>
+            <p class="text-sm text-slate-400">Quota completion and team performance widgets</p>
+        </div>
+        <span class="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-bold text-emerald-200">On pace</span>
+    </div>
+    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {% for target in targets %}
+            <article class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-bold text-white">{{ target.label }}</p>
+                    <span class="text-sm font-black text-cyan-200">{{ target.value }}</span>
+                </div>
+                <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-800">
+                    <div class="h-full rounded-full bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-300"
+                         style="width: {{ target.progress }}%"></div>
+                </div>
+                <p class="mt-3 text-xs text-slate-500">{{ target.progress }}% quota completion</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>

@@ -1,0 +1,146 @@
+{% extends "dashboard.html" %}
+{% block title %}
+    Forecasting -
+{% endblock title %}
+{% block content %}
+    <main class="sales-dashboard p-4 md:ml-64 h-auto pt-20 min-h-screen">
+        <div class="mx-auto max-w-screen-2xl space-y-6">
+            <section class="sales-card rounded-2xl p-5">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wide text-cyan-200">AI Forecasting</p>
+                        <h1 class="mt-2 text-2xl font-black text-white">Sales Forecast</h1>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-300 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-200">
+                            <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                            Generate Forecast
+                        </button>
+                    </form>
+                </div>
+            </section>
+            <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <article class="sales-card rounded-2xl p-5">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Pipeline Value</p>
+                    <p class="mt-3 text-2xl font-black text-white">{{ local_forecast.pipeline_value }}</p>
+                </article>
+                <article class="sales-card rounded-2xl p-5">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Weighted Forecast</p>
+                    <p class="mt-3 text-2xl font-black text-white">{{ local_forecast.weighted_forecast_value }}</p>
+                </article>
+                <article class="sales-card rounded-2xl p-5">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Converted Value</p>
+                    <p class="mt-3 text-2xl font-black text-white">{{ local_forecast.converted_value }}</p>
+                </article>
+                <article class="sales-card rounded-2xl p-5">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Records</p>
+                    <p class="mt-3 text-2xl font-black text-white">
+                        {{ local_forecast.lead_count }} leads
+                    </p>
+                    <p class="mt-1 text-sm text-slate-400">
+                        {{ local_forecast.activity_count }} activities
+                    </p>
+                </article>
+            </section>
+            <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                <article class="sales-card rounded-2xl p-5 xl:col-span-2">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-bold text-white">Gemini Forecast</h2>
+                            <p class="text-sm text-slate-400">Generated from current CRM data</p>
+                        </div>
+                        <span class="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold text-cyan-200">
+                            {{ local_forecast.lead_count }} leads
+                        </span>
+                    </div>
+                    <div class="mt-5 rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+                        {% if ai_forecast %}
+                            {% if ai_forecast.ok %}
+                                <div class="whitespace-pre-line text-sm leading-6 text-slate-200">{{ ai_forecast.message }}</div>
+                            {% else %}
+                                <div class="rounded-xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm leading-6 text-amber-100">
+                                    {{ ai_forecast.message }}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-sm leading-6 text-slate-400">
+                                Run the forecast when your latest lead and activity data is ready.
+                            </p>
+                        {% endif %}
+                    </div>
+                </article>
+                <article class="sales-card rounded-2xl p-5">
+                    <h2 class="text-lg font-bold text-white">Status Mix</h2>
+                    <div class="mt-5 space-y-3">
+                        {% for item in local_forecast.status_counts %}
+                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="text-sm font-bold text-white">{{ item.status }}</p>
+                                    <span class="text-sm font-black text-cyan-200">{{ item.total }}</span>
+                                </div>
+                                <p class="mt-1 text-xs text-slate-500">Revenue: Rs. {{ item.revenue|default:"0" }}</p>
+                            </div>
+                        {% empty %}
+                            <p class="rounded-xl border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500">
+                                No leads yet
+                            </p>
+                        {% endfor %}
+                    </div>
+                </article>
+            </section>
+            <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                <article class="sales-card rounded-2xl p-5">
+                    <h2 class="text-lg font-bold text-white">Categories</h2>
+                    <div class="mt-5 space-y-3">
+                        {% for item in local_forecast.category_counts %}
+                            <div class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <span class="text-sm font-semibold text-slate-200">{{ item.category__name|default:"Uncategorized" }}</span>
+                                <span class="text-sm font-black text-cyan-200">{{ item.total }}</span>
+                            </div>
+                        {% empty %}
+                            <p class="rounded-xl border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500">
+                                No categories yet
+                            </p>
+                        {% endfor %}
+                    </div>
+                </article>
+                <article class="sales-card rounded-2xl p-5">
+                    <h2 class="text-lg font-bold text-white">Agents</h2>
+                    <div class="mt-5 space-y-3">
+                        {% for item in local_forecast.agent_counts %}
+                            <div class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <span class="text-sm font-semibold text-slate-200">
+                                    {{ item.agent__first_name|default:"Unassigned" }} {{ item.agent__last_name }}
+                                </span>
+                                <span class="text-sm font-black text-cyan-200">{{ item.total }}</span>
+                            </div>
+                        {% empty %}
+                            <p class="rounded-xl border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500">
+                                No agents yet
+                            </p>
+                        {% endfor %}
+                    </div>
+                </article>
+                <article class="sales-card rounded-2xl p-5">
+                    <h2 class="text-lg font-bold text-white">Activities</h2>
+                    <div class="mt-5 space-y-3">
+                        {% for item in local_forecast.activity_counts %}
+                            <div class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <span class="text-sm font-semibold text-slate-200">
+                                    {{ item.activity_type }} / {% if item.completed %}done{% else %}open{% endif %}
+                                </span>
+                                <span class="text-sm font-black text-cyan-200">{{ item.total }}</span>
+                            </div>
+                        {% empty %}
+                            <p class="rounded-xl border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500">
+                                No activities yet
+                            </p>
+                        {% endfor %}
+                    </div>
+                </article>
+            </section>
+        </div>
+    </main>
+{% endblock content %}

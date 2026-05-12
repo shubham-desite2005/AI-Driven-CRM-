@@ -1,0 +1,25 @@
+<section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
+    {% for metric in metrics %}
+        <article class="sales-card group rounded-2xl p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ metric.label }}</p>
+                    <p class="mt-3 text-2xl font-black text-white">{{ metric.value }}</p>
+                </div>
+                <div class="sales-icon sales-icon-{{ metric.tone }}">
+                    <i class="fa-solid {{ metric.icon }}"></i>
+                </div>
+            </div>
+            <div class="mt-5 flex items-center justify-between text-xs">
+                <span class="{% if '-' in metric.trend %}text-rose-300{% else %}text-emerald-300{% endif %}">
+                    {{ metric.trend }}
+                </span>
+                <span class="text-slate-500">vs last month</span>
+            </div>
+            <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
+                <div class="h-full rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300"
+                     style="width: {{ metric.progress }}%"></div>
+            </div>
+        </article>
+    {% endfor %}
+</section>

@@ -1,0 +1,139 @@
+{% extends "dashboard.html" %}
+{% block title %}
+    Sales Command Center -
+{% endblock title %}
+{% block content %}
+    {{ chart_data|json_script:"sales-chart-data" }}
+    <main class="sales-dashboard p-4 md:ml-64 h-auto pt-20 min-h-screen">
+        <div class="mx-auto max-w-screen-2xl space-y-6">
+            {% include "dashboard/partials/analytics/hero.html" %}
+            {% include "dashboard/partials/analytics/kpi_cards.html" %}
+            {% include "dashboard/partials/analytics/charts.html" %}
+            {% include "dashboard/partials/analytics/pipeline.html" %}
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {% include "dashboard/partials/analytics/ai_command_center.html" %}
+                {% include "dashboard/partials/analytics/activity_feed.html" %}
+            </div>
+            {% include "dashboard/partials/analytics/targets.html" %}
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const chartPayload = JSON.parse(document.getElementById('sales-chart-data').textContent);
+        const chartTheme = {
+            text: '#cbd5e1',
+            grid: 'rgba(148, 163, 184, 0.14)',
+            cyan: '#22d3ee',
+            green: '#34d399',
+            amber: '#fbbf24',
+            rose: '#fb7185',
+            violet: '#a78bfa',
+            blue: '#60a5fa'
+        };
+
+        function makeGradient(ctx, color) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+            gradient.addColorStop(0, color.replace(')', ', 0.38)').replace('rgb', 'rgba'));
+            gradient.addColorStop(1, color.replace(')', ', 0)').replace('rgb', 'rgba'));
+            return gradient;
+        }
+
+        Chart.defaults.color = chartTheme.text;
+        Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, sans-serif';
+
+        const pipelineCtx = document.getElementById('pipelineChart');
+        new Chart(pipelineCtx, {
+            type: 'bar',
+            data: {
+                labels: chartPayload.pipeline.labels,
+                datasets: [{
+                    label: 'Leads',
+                    data: chartPayload.pipeline.values,
+                    backgroundColor: ['#22d3ee', '#38bdf8', '#818cf8', '#a78bfa', '#34d399', '#fb7185'],
+                    borderRadius: 12,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: chartTheme.grid }, beginAtZero: true }
+                }
+            }
+        });
+
+        const revenueCtx = document.getElementById('revenueChart');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: chartPayload.revenue.labels,
+                datasets: [{
+                    label: 'Revenue in lakhs',
+                    data: chartPayload.revenue.values,
+                    borderColor: chartTheme.cyan,
+                    backgroundColor: makeGradient(revenueCtx.getContext('2d'), 'rgb(34, 211, 238)'),
+                    fill: true,
+                    tension: 0.42,
+                    pointBackgroundColor: '#ecfeff',
+                    pointBorderColor: chartTheme.cyan,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: chartTheme.grid }, beginAtZero: true }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: chartPayload.categories.labels,
+                datasets: [{
+                    data: chartPayload.categories.values,
+                    backgroundColor: ['#22d3ee', '#34d399', '#a78bfa', '#fbbf24', '#fb7185'],
+                    borderColor: '#0f172a',
+                    borderWidth: 4,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
+            }
+        });
+
+        new Chart(document.getElementById('conversionChart'), {
+            type: 'bar',
+            data: {
+                labels: chartPayload.conversion.labels,
+                datasets: [{
+                    label: 'Conversion %',
+                    data: chartPayload.conversion.values,
+                    backgroundColor: '#34d399',
+                    borderRadius: 10,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: chartTheme.grid }, beginAtZero: true, max: 50 }
+                }
+            }
+        });
+    </script>
+{% endblock content %}

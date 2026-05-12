@@ -1,0 +1,49 @@
+<section class="sales-hero overflow-hidden rounded-3xl border border-white/10 p-6 sm:p-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <div class="lg:col-span-2">
+            <div class="inline-flex items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-100">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                AI Sales Intelligence
+            </div>
+            <h1 class="mt-5 text-3xl sm:text-5xl font-black tracking-tight text-white">
+                Welcome back, {{ user.username|default:"Sales Leader" }}
+            </h1>
+            <p class="mt-4 max-w-3xl text-sm sm:text-base leading-7 text-slate-200">
+                Your command center is monitoring pipeline health, revenue momentum, client risk,
+                and next-best actions across the sales floor.
+            </p>
+            <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="sales-glass-panel rounded-2xl p-4">
+                    <p class="text-xs text-slate-400">Pipeline Health</p>
+                    <p class="mt-2 text-2xl font-bold text-emerald-300">Strong</p>
+                </div>
+                <div class="sales-glass-panel rounded-2xl p-4">
+                    <p class="text-xs text-slate-400">Forecast Confidence</p>
+                    <p class="mt-2 text-2xl font-bold text-cyan-300">87%</p>
+                </div>
+                <div class="sales-glass-panel rounded-2xl p-4">
+                    <p class="text-xs text-slate-400">Risk Level</p>
+                    <p class="mt-2 text-2xl font-bold text-amber-300">Medium</p>
+                </div>
+                <div class="sales-glass-panel rounded-2xl p-4">
+                    <p class="text-xs text-slate-400">Close Window</p>
+                    <p class="mt-2 text-2xl font-bold text-violet-300">14d</p>
+                </div>
+            </div>
+        </div>
+        <aside class="sales-glass-panel rounded-3xl p-5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-white">AI Insights</h2>
+                <span class="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-200">Live</span>
+            </div>
+            <ul class="mt-5 space-y-4">
+                {% for insight in ai_insights %}
+                    <li class="flex gap-3 text-sm leading-6 text-slate-200">
+                        <span class="mt-1 h-2 w-2 flex-none rounded-full bg-cyan-300 shadow-lg shadow-cyan-400/40"></span>
+                        <span>{{ insight }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </div>
+</section>

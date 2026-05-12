@@ -1,0 +1,11 @@
+services:
+  web:
+    container_name: intelligent-crm-web
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env

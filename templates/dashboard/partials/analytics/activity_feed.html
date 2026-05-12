@@ -1,0 +1,13 @@
+<section class="sales-card rounded-2xl p-5">
+    <h2 class="text-xl font-black text-white">Recent Activity</h2>
+    <p class="text-sm text-slate-400">Live-style sales operations timeline</p>
+    <ol class="relative mt-6 space-y-5 border-l border-slate-700">
+        {% for activity in activities %}
+            <li class="ml-5">
+                <span class="absolute -left-2 mt-1 h-4 w-4 rounded-full border-4 border-slate-950 bg-cyan-300"></span>
+                <p class="text-sm font-semibold text-slate-100">{{ activity }}</p>
+                <p class="mt-1 text-xs text-slate-500">{{ forloop.counter }} min ago</p>
+            </li>
+        {% endfor %}
+    </ol>
+</section>

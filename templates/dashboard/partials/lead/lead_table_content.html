@@ -1,0 +1,110 @@
+{% load lead_extras %}
+<div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-4 py-3">Status</th>
+                <th scope="col" class="px-4 py-3">First Name</th>
+                <th scope="col" class="px-4 py-3">Last Name</th>
+                <th scope="col" class="px-4 py-3">Email</th>
+                <th scope="col" class="px-4 py-3 text-right">
+                    <button type="button"
+                            id="sortRevenueButton"
+                            class="inline-flex items-center gap-1 font-semibold uppercase"
+                            aria-label="Sort by revenue">
+                        Revenue
+                        <i class="fa-solid fa-sort text-[10px]" aria-hidden="true"></i>
+                    </button>
+                </th>
+                <th scope="col" class="px-4 py-3">Category</th>
+                <th scope="col" class="px-4 py-3">Agent</th>
+                <th scope="col" class="px-4 py-3">Created At</th>
+                <th scope="col" class="px-4 py-3">Updated At</th>
+                <th scope="col" class="px-4 py-3">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="leadTableBody">
+            {% for lead in leads %}
+                <tr class="border-b dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    data-detail-url="{% url 'dashboard:leads_detail' pk=lead.id %}"
+                    data-revenue="{{ lead.revenue }}">
+                    <td class="px-4 py-3">
+                        <span class="whitespace-nowrap rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">{{ lead.status }}</span>
+                    </td>
+                    <td class="px-4 py-3">{{ lead.first_name }}</td>
+                    <td class="px-4 py-3">{{ lead.last_name }}</td>
+                    <td class="px-4 py-3">{{ lead.masked_email }}</td>
+                    <td class="px-4 py-3 text-right tabular-nums">{{ lead.revenue|currency }}</td>
+                    <td class="px-4 py-3">{{ lead.category.name }}</td>
+                    <td class="px-4 py-3">{{ lead.agent.first_name }}</td>
+                    <td class="px-4 py-3">{{ lead.created_at|date:'Y-m-d' }}</td>
+                    <td class="px-4 py-3">{{ lead.updated_at|date:'Y-m-d' }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <a href="{% url 'dashboard:leads_detail' pk=lead.id %}"
+                           class="mr-2 font-medium hover:underline"
+                           data-no-row-click="true">👁 View</a>
+                        <a href="#"
+                           name="item_update"
+                           class="mr-2 font-medium hover:underline"
+                           data-url="{% url 'dashboard:leads_update' pk=lead.id %}"
+                           data-first-name="{{ lead.first_name }}"
+                           data-last-name="{{ lead.last_name }}"
+                           data-email="{{ lead.email }}"
+                           data-age="{{ lead.age }}"
+                           data-status="{{ lead.status }}"
+                           data-revenue="{{ lead.revenue }}"
+                           data-category="{{ lead.category.id|default:'' }}"
+                           data-agent="{{ lead.agent.id|default:'' }}"
+                           data-target="#itemUpdateModal"
+                           data-no-row-click="true"
+                           data-modal-toggle="itemUpdateModal">✏️ Edit</a>
+                        <a href="javascript:void(0)"
+                           name="item_delete"
+                           class="font-medium hover:underline"
+                           data-url="{% url 'dashboard:leads_delete' pk=lead.id %}"
+                           data-target="#itemDeleteModal"
+                           data-no-row-click="true"
+                           data-modal-toggle="itemDeleteModal">🗑 Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    (() => {
+        const tableBody = document.getElementById('leadTableBody');
+        const sortButton = document.getElementById('sortRevenueButton');
+        let sortAscending = true;
+
+        tableBody?.addEventListener('click', (event) => {
+            const noRowClick = event.target.closest('[data-no-row-click="true"]');
+
+            if (noRowClick) {
+                return;
+            }
+
+            const row = event.target.closest('tr[data-detail-url]');
+            if (row) {
+                row.classList.add('opacity-60');
+                row.setAttribute('aria-busy', 'true');
+                window.location.href = row.dataset.detailUrl;
+            }
+        });
+
+        sortButton?.addEventListener('click', () => {
+            const rows = Array.from(tableBody.querySelectorAll('tr[data-revenue]'));
+
+            rows.sort((firstRow, secondRow) => {
+                const firstRevenue = Number(firstRow.dataset.revenue || 0);
+                const secondRevenue = Number(secondRow.dataset.revenue || 0);
+                return sortAscending
+                    ? firstRevenue - secondRevenue
+                    : secondRevenue - firstRevenue;
+            });
+
+            rows.forEach((row) => tableBody.appendChild(row));
+            sortAscending = !sortAscending;
+        });
+    })();
+</script>

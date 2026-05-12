@@ -1,0 +1,37 @@
+<div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-4 py-3">Name</th>
+                <th scope="col" class="px-4 py-3">Description</th>
+                <th scope="col" class="px-4 py-3">Created_at</th>
+                <th scope="col" class="px-4 py-3">Updated_at</th>
+                <th scope="col" class="px-4 py-3">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+                <tr class="border-b dark:border-gray-700">
+                    <td class="px-4 py-3">{{ category.name }}</td>
+                    <td class="px-4 py-3">{{ category.description }}</td>
+                    <td class="px-4 py-3">{{ category.created_at|date:'Y-m-d' }}</td>
+                    <td class="px-4 py-3">{{ category.updated_at|date:'Y-m-d' }}</td>
+                    <td class="px-4 py-3">
+                        <a href="javascript:void(0)"
+                           name="item_delete"
+                           class="font-medium hover:underline"
+                           data-url="{% url 'dashboard:leads_category_delete' pk=category.id %}"
+                           data-target="#itemDeleteModal"
+                           data-modal-toggle="itemDeleteModal">Remove</a>
+                        <a href="#"
+                           name="item_update"
+                           class="font-medium hover:underline"
+                           data-url="{% url 'dashboard:leads_category_update' pk=category.id %}"
+                           data-target="#itemUpdateModal"
+                           data-modal-toggle="itemUpdateModal">Edit</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
