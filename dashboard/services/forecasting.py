@@ -29,6 +29,10 @@ def _format_money(value):
     return f'Rs. {_money(value):,.2f}'
 
 
+def _chart_value(value):
+    return float(_money(value))
+
+
 def _lead_payload(lead):
     return {
         'id': lead.id,
@@ -64,7 +68,11 @@ def build_forecast_dataset(limit=40):
         .order_by('-updated_at', '-id')[:limit]
     )
 
-    pipeline_value = sum(_money(lead.revenue) for lead in leads)
+    pipeline_value = sum(
+        _money(lead.revenue)
+        for lead in leads
+        if lead.status not in [Lead.STATUS_LOST, Lead.STATUS_CONVERTED]
+    )
     weighted_value = sum(
         _money(lead.revenue)
         * FORECAST_STATUS_WEIGHTS.get(lead.status, Decimal('0.10'))
@@ -75,6 +83,18 @@ def build_forecast_dataset(limit=40):
         for lead in leads
         if lead.status == Lead.STATUS_CONVERTED
     )
+    lost_deals = Lead.objects.filter(status=Lead.STATUS_LOST).aggregate(
+        total=Count('id'),
+    )
+    lost_count = lost_deals['total'] or 0
+    growth_chart = {
+        'labels': ['Completed', 'Forecast', 'Open Pipeline'],
+        'values': [
+            _chart_value(converted_value),
+            _chart_value(weighted_value),
+            _chart_value(pipeline_value),
+        ],
+    }
 
     status_counts = list(
         Lead.objects.values('status')
@@ -104,6 +124,8 @@ def build_forecast_dataset(limit=40):
         'pipeline_value': str(pipeline_value),
         'weighted_forecast_value': str(weighted_value),
         'converted_value': str(converted_value),
+        'lost_count': lost_count,
+        'growth_chart': growth_chart,
         'status_counts': status_counts,
         'category_counts': category_counts,
         'agent_counts': agent_counts,
@@ -119,6 +141,8 @@ def build_local_forecast(dataset):
             dataset['weighted_forecast_value']
         ),
         'converted_value': _format_money(dataset['converted_value']),
+        'lost_count': dataset['lost_count'],
+        'growth_chart': dataset['growth_chart'],
         'lead_count': dataset['lead_count'],
         'activity_count': dataset['activity_count'],
         'status_counts': dataset['status_counts'],
@@ -147,7 +171,10 @@ def _build_prompt(dataset):
         'The agent field means the outside person/source bringing orders, '
         'not the internal CRM owner. '
         'Give a concise forecast with: expected sales amount, likely sales '
-        'count, top risks, top opportunities, and immediate actions. '
+        'count, lost-deal impact, top risks, top opportunities, and '
+        'immediate actions. '
+        'Use the growth_chart values to align your text forecast with the '
+        'graph shown in the UI. '
         'Do not invent close dates, lead sources, owners, lost reasons, or '
         'probability fields.\n\n'
         f'CRM data JSON:\n{json.dumps(dataset, default=str)}'

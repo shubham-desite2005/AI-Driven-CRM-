@@ -1,40 +1,90 @@
 <section class="mx-auto max-w-screen-xl px-4 lg:px-12 pb-6">
     <div class="ai-email-panel rounded-2xl p-5 shadow-xl">
+        {% for lead in leads %}
+            {% if forloop.first %}
+                <input type="hidden" id="aiEmailLeadId" value="{{ lead.id }}">
+                <input type="hidden" id="aiEmailLeadName" value="{{ lead.first_name }} {{ lead.last_name }}">
+                <input type="hidden" id="aiEmailLeadEmail" value="{{ lead.email }}">
+            {% endif %}
+        {% endfor %}
+
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div>
                 <div class="inline-flex items-center gap-2 rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-cyan-200">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     AI Email Assistant
                 </div>
-                <h2 class="mt-3 text-2xl font-black text-white">Generate AI Follow-Up</h2>
+                <h2 class="mt-3 text-2xl font-black text-white">Write Follow-Up Email</h2>
                 <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                    Draft a professional follow-up from the selected lead context and keep the workflow inside the CRM.
+                    Add the recipient, generate with Gemini, or write your own draft and polish it before sending.
                 </p>
             </div>
-            <button type="button"
-                    id="generateFollowupEmail"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-300 px-5 py-3 text-sm font-black text-slate-950 hover:bg-cyan-200">
-                <i class="fa-solid fa-envelope-open-text"></i>
-                Generate AI Follow-Up
-            </button>
+            <div class="inline-flex rounded-xl border border-white/10 bg-slate-950/50 p-1">
+                <button type="button"
+                        id="aiEmailMode"
+                        class="rounded-lg bg-cyan-300 px-4 py-2 text-sm font-black text-slate-950">
+                    AI Generate
+                </button>
+                <button type="button"
+                        id="manualEmailMode"
+                        class="rounded-lg px-4 py-2 text-sm font-bold text-slate-300 hover:bg-white/5">
+                    Self Write
+                </button>
+            </div>
         </div>
+
         <div class="mt-5 grid grid-cols-1 xl:grid-cols-3 gap-4">
             <div class="rounded-2xl border border-white/10 bg-slate-950/50 p-4 xl:col-span-2">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-bold uppercase tracking-wide text-slate-400">Generated Email Preview</h3>
-                    <span class="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-bold text-emerald-200">Ready to edit</span>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                        <label for="recipientEmail" class="text-sm font-bold text-slate-300">Recipient email</label>
+                        <input type="email"
+                               id="recipientEmail"
+                               class="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-300"
+                               placeholder="client@company.com"
+                               value="{% for lead in leads %}{% if forloop.first %}{{ lead.email }}{% endif %}{% endfor %}">
+                    </div>
+                    <div>
+                        <label for="emailCondition" class="text-sm font-bold text-slate-300">Email goal or condition</label>
+                        <input type="text"
+                               id="emailCondition"
+                               class="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-300"
+                               placeholder="Example: offer a demo, payment reminder, pricing recap">
+                    </div>
                 </div>
-                <div id="aiEmailPreview"
-                     class="mt-4 min-h-56 whitespace-pre-line rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm leading-7 text-slate-200">
-                    Select Generate AI Follow-Up to create a tailored email for the latest lead.
+
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <button type="button"
+                            id="generateFollowupEmail"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-300 px-5 py-2.5 text-sm font-black text-slate-950 hover:bg-cyan-200">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                        Generate AI Follow-Up
+                    </button>
+                    <button type="button"
+                            id="fixEmailGrammar"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-300/30 px-5 py-2.5 text-sm font-bold text-cyan-100 hover:bg-cyan-300/10">
+                        <i class="fa-solid fa-spell-check"></i>
+                        Fix Grammar
+                    </button>
                 </div>
+
+                <div class="mt-5 flex items-center justify-between gap-3">
+                    <h3 id="emailComposerTitle" class="text-sm font-bold uppercase tracking-wide text-slate-400">Email Composer</h3>
+                    <span id="emailAssistantStatus"
+                          class="rounded-full bg-emerald-300/10 px-3 py-1 text-xs font-bold text-emerald-200">Ready</span>
+                </div>
+                <textarea id="aiEmailPreview"
+                          class="mt-4 min-h-72 w-full resize-y rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm leading-7 text-slate-200 outline-none focus:border-cyan-300"
+                          placeholder="Write your email here, or use Generate AI Follow-Up to create one with Gemini."></textarea>
                 <div class="mt-4 flex flex-col sm:flex-row gap-3">
                     <button type="button"
+                            id="sendEmailButton"
                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-300 px-5 py-2.5 text-sm font-black text-slate-950 hover:bg-emerald-200">
                         <i class="fa-solid fa-paper-plane"></i>
                         Send Email
                     </button>
                     <button type="button"
+                            id="saveDraftButton"
                             class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-2.5 text-sm font-bold text-slate-200 hover:bg-white/5">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         Save Draft
@@ -43,18 +93,10 @@
             </div>
             <aside class="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
                 <h3 class="text-sm font-bold uppercase tracking-wide text-slate-400">Email History</h3>
-                <div class="mt-4 space-y-3">
+                <div id="emailHistory" class="mt-4 space-y-3">
                     <div class="rounded-xl bg-white/[0.03] p-3">
-                        <p class="text-sm font-semibold text-white">Follow-up sequence created</p>
-                        <p class="mt-1 text-xs text-slate-500">Today, 10:24 AM</p>
-                    </div>
-                    <div class="rounded-xl bg-white/[0.03] p-3">
-                        <p class="text-sm font-semibold text-white">Discovery recap sent</p>
-                        <p class="mt-1 text-xs text-slate-500">Yesterday, 4:10 PM</p>
-                    </div>
-                    <div class="rounded-xl bg-white/[0.03] p-3">
-                        <p class="text-sm font-semibold text-white">Proposal reminder drafted</p>
-                        <p class="mt-1 text-xs text-slate-500">Monday, 1:15 PM</p>
+                        <p class="text-sm font-semibold text-white">Composer ready</p>
+                        <p class="mt-1 text-xs text-slate-500">Add recipient and write or generate</p>
                     </div>
                 </div>
             </aside>
@@ -63,25 +105,187 @@
 </section>
 
 <script>
-    const generateButton = document.getElementById('generateFollowupEmail');
-    const emailPreview = document.getElementById('aiEmailPreview');
-    const leadName = '{% for lead in leads %}{% if forloop.first %}{{ lead.first_name }} {{ lead.last_name }}{% endif %}{% empty %}Aarav Mehta{% endfor %}';
-    const leadCategory = '{% for lead in leads %}{% if forloop.first %}{{ lead.category.name|default:"Enterprise" }}{% endif %}{% empty %}Enterprise{% endfor %}';
+    (function () {
+        const generateButton = document.getElementById('generateFollowupEmail');
+        const grammarButton = document.getElementById('fixEmailGrammar');
+        const sendButton = document.getElementById('sendEmailButton');
+        const saveButton = document.getElementById('saveDraftButton');
+        const aiModeButton = document.getElementById('aiEmailMode');
+        const manualModeButton = document.getElementById('manualEmailMode');
+        const emailPreview = document.getElementById('aiEmailPreview');
+        const recipientInput = document.getElementById('recipientEmail');
+        const conditionInput = document.getElementById('emailCondition');
+        const statusBadge = document.getElementById('emailAssistantStatus');
+        const historyList = document.getElementById('emailHistory');
+        const leadIdInput = document.getElementById('aiEmailLeadId');
+        const leadNameInput = document.getElementById('aiEmailLeadName');
+        const leadEmailInput = document.getElementById('aiEmailLeadEmail');
+        const endpoint = "{% url 'dashboard-email-assistant' %}";
 
-    if (generateButton && emailPreview) {
-        generateButton.addEventListener('click', function () {
-            emailPreview.textContent = `Subject: Strategic next steps for ${leadName}
+        function getCookie(name) {
+            const cookies = document.cookie ? document.cookie.split(';') : [];
+            for (let index = 0; index < cookies.length; index += 1) {
+                const cookie = cookies[index].trim();
+                if (cookie.substring(0, name.length + 1) === `${name}=`) {
+                    return decodeURIComponent(cookie.substring(name.length + 1));
+                }
+            }
+            return '';
+        }
 
-Hi ${leadName},
+        function setStatus(message, tone) {
+            statusBadge.textContent = message;
+            statusBadge.className = 'rounded-full px-3 py-1 text-xs font-bold';
+            if (tone === 'error') {
+                statusBadge.classList.add('bg-rose-300/10', 'text-rose-200');
+            } else if (tone === 'working') {
+                statusBadge.classList.add('bg-cyan-300/10', 'text-cyan-200');
+            } else {
+                statusBadge.classList.add('bg-emerald-300/10', 'text-emerald-200');
+            }
+        }
 
-Thank you for your time. Based on our latest conversation and your ${leadCategory} priorities, I recommend we align on the business outcomes, implementation timeline, and success metrics in the next call.
+        function addHistory(title, detail) {
+            const item = document.createElement('div');
+            item.className = 'rounded-xl bg-white/[0.03] p-3';
+            item.innerHTML = `<p class="text-sm font-semibold text-white"></p><p class="mt-1 text-xs text-slate-500"></p>`;
+            item.querySelector('p:first-child').textContent = title;
+            item.querySelector('p:last-child').textContent = detail;
+            historyList.prepend(item);
+        }
 
-I can share a concise proposal covering expected ROI, onboarding milestones, and the fastest path to value.
+        function switchMode(mode) {
+            const aiMode = mode === 'ai';
+            generateButton.disabled = !aiMode;
+            generateButton.classList.toggle('opacity-50', !aiMode);
+            generateButton.classList.toggle('cursor-not-allowed', !aiMode);
+            aiModeButton.className = aiMode
+                ? 'rounded-lg bg-cyan-300 px-4 py-2 text-sm font-black text-slate-950'
+                : 'rounded-lg px-4 py-2 text-sm font-bold text-slate-300 hover:bg-white/5';
+            manualModeButton.className = aiMode
+                ? 'rounded-lg px-4 py-2 text-sm font-bold text-slate-300 hover:bg-white/5'
+                : 'rounded-lg bg-cyan-300 px-4 py-2 text-sm font-black text-slate-950';
+            setStatus(aiMode ? 'Ready for AI' : 'Manual writing', 'ready');
+        }
 
-Recommended next action: schedule a 30-minute follow-up within the next 24 hours while momentum is high.
+        async function runAssistant(action) {
+            const emailBody = emailPreview.value.trim();
+            if (action === 'fix_grammar' && !emailBody) {
+                setStatus('Write a draft first', 'error');
+                emailPreview.focus();
+                return;
+            }
 
-Best regards,
-SalesOps Team`;
-        });
-    }
+            setStatus(action === 'generate' ? 'Generating...' : 'Fixing grammar...', 'working');
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({
+                        action: action,
+                        lead_id: leadIdInput ? leadIdInput.value : '',
+                        recipient: recipientInput.value.trim(),
+                        condition: conditionInput.value.trim(),
+                        email_body: emailBody,
+                    }),
+                });
+                const data = await response.json();
+                if (!response.ok || !data.ok) {
+                    throw new Error(data.message || 'Email assistant failed.');
+                }
+
+                emailPreview.value = data.message;
+                setStatus(data.source === 'local' ? 'Local draft ready' : 'Gemini draft ready', 'ready');
+                addHistory(
+                    action === 'generate' ? 'AI follow-up generated' : 'Grammar fixed',
+                    new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+                );
+            } catch (error) {
+                setStatus('Assistant error', 'error');
+                addHistory('Assistant error', error.message);
+            }
+        }
+
+        async function sendEmail() {
+            const recipient = recipientInput.value.trim();
+            if (!recipient) {
+                setStatus('Recipient required', 'error');
+                recipientInput.focus();
+                return;
+            }
+            if (!recipientInput.checkValidity()) {
+                setStatus('Enter a valid email', 'error');
+                recipientInput.focus();
+                return;
+            }
+            if (!emailPreview.value.trim()) {
+                setStatus('Email body required', 'error');
+                emailPreview.focus();
+                return;
+            }
+
+            setStatus('Sending...', 'working');
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({
+                        action: 'send',
+                        recipient: recipient,
+                        email_body: emailPreview.value.trim(),
+                    }),
+                });
+                const data = await response.json();
+                if (!response.ok || !data.ok) {
+                    throw new Error(data.message || 'Email sending failed.');
+                }
+
+                setStatus('Email sent', 'ready');
+                addHistory('Email sent', `To ${recipient}`);
+            } catch (error) {
+                setStatus('Send failed', 'error');
+                addHistory('Send failed', error.message);
+            }
+        }
+
+        function saveDraft() {
+            const draft = {
+                recipient: recipientInput.value.trim(),
+                condition: conditionInput.value.trim(),
+                body: emailPreview.value,
+                saved_at: new Date().toISOString(),
+            };
+            localStorage.setItem('crmEmailAssistantDraft', JSON.stringify(draft));
+            setStatus('Draft saved', 'ready');
+            addHistory('Draft saved', new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }));
+        }
+
+        const savedDraft = localStorage.getItem('crmEmailAssistantDraft');
+        if (savedDraft) {
+            try {
+                const draft = JSON.parse(savedDraft);
+                recipientInput.value = draft.recipient || recipientInput.value;
+                conditionInput.value = draft.condition || '';
+                emailPreview.value = draft.body || '';
+                addHistory('Saved draft loaded', 'Stored in this browser');
+            } catch (error) {
+                localStorage.removeItem('crmEmailAssistantDraft');
+            }
+        } else if (leadNameInput && leadEmailInput && leadEmailInput.value) {
+            addHistory('Latest lead selected', `${leadNameInput.value} <${leadEmailInput.value}>`);
+        }
+
+        aiModeButton.addEventListener('click', () => switchMode('ai'));
+        manualModeButton.addEventListener('click', () => switchMode('manual'));
+        generateButton.addEventListener('click', () => runAssistant('generate'));
+        grammarButton.addEventListener('click', () => runAssistant('fix_grammar'));
+        sendButton.addEventListener('click', sendEmail);
+        saveButton.addEventListener('click', saveDraft);
+    })();
 </script>

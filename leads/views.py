@@ -50,7 +50,9 @@ def build_additional_url_query(**params):
 def build_lead_summary(leads):
     return {
         'total_leads': leads.count(),
-        'total_revenue': leads.aggregate(total=Sum('revenue'))['total'] or 0,
+        'total_revenue': leads.filter(
+            status=Lead.STATUS_CONVERTED,
+        ).aggregate(total=Sum('revenue'))['total'] or 0,
         'status_options': get_lead_status_options(),
     }
 
