@@ -849,6 +849,9 @@ video {
 .h-6 {
   height: 1.5rem;
 }
+.h-64 {
+  height: 16rem;
+}
 .h-72 {
   height: 18rem;
 }
@@ -1055,6 +1058,9 @@ video {
 }
 .gap-4 {
   gap: 1rem;
+}
+.gap-5 {
+  gap: 1.25rem;
 }
 .gap-6 {
   gap: 1.5rem;
@@ -2449,6 +2455,10 @@ video {
     grid-column: span 2 / span 2;
   }
 
+  .lg\:col-span-3 {
+    grid-column: span 3 / span 3;
+  }
+
   .lg\:mb-6 {
     margin-bottom: 1.5rem;
   }
@@ -2467,6 +2477,10 @@ video {
 
   .lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   .lg\:flex-row {
@@ -2517,6 +2531,10 @@ video {
 
   .xl\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .xl\:grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   .xl\:grid-cols-6 {
